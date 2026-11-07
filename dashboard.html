@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Student Dashboard | GlobalMedia AI Developer Coach</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js"></script>
+
+<style>
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background: #080d18;
+    color: white;
+    font-family: Arial, sans-serif;
+    min-height: 100vh;
+}
+
+header {
+    background: #111a2b;
+    border-bottom: 1px solid #26344a;
+    padding: 18px 6%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo {
+    font-size: 21px;
+    font-weight: bold;
+}
+
+.logo span {
+    color: #3b9cff;
+}
+
+.logout {
+    background: transparent;
+    border: 1px solid #34445e;
+    color: #ff7777;
+    padding: 10px 16px;
+    border-radius: 7px;
+    cursor: pointer;
+}
+
+main {
+    width: 100%;
+    max-width: 1150px;
+    margin: auto;
+    padding: 35px 20px;
+}
+
+.welcome {
+    margin-bottom: 30px;
+}
+
+.welcome h1 {
+    font-size: 27px;
+    margin-bottom: 10px;
+}
+
+.welcome h1 span {
+    color: #3b9cff;
+}
+
+.welcome p {
+    color: #aab6ca;
+    font-size: 14px;
+    line-height: 1.7;
+}
+
+.profile-card {
+    background: linear-gradient(135deg, #142744, #111a2b);
+    border: 1px solid #263e5d;
+    border-radius: 13px;
+    padding: 24px;
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    margin-bottom: 30px;
+}
+
+.avatar {
+    width: 65px;
+    height: 65px;
+    border-radius: 50%;
+    background: #3b9cff;
+    color: #06101d;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    font-weight: bold;
+    flex-shrink: 0;
+    overflow: hidden;
+}
+
+.avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.profile-info h3 {
+    margin-bottom: 7px;
+    font-size: 18px;
+}
+
+.profile-info p {
+    color: #aab6ca;
+    font-size: 13px;
+    margin-top: 5px;
+}
+
+.section-title {
+    font-size: 19px;
+    margin-bottom: 17px;
+}
+
+.stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+    margin-bottom: 35px;
+}
+
+.stat-card {
+    background: #111a2b;
+    border: 1px solid #26344a;
+    padding: 22px;
+    border-radius: 11px;
+}
+
+.stat-card h3 {
+    font-size: 25px;
+    color: #3b9cff;
+    margin-bottom: 8px;
+}
+
+.stat-card p {
+    color: #aab6ca;
+    font-size: 13px;
+}
+
+.learning-card {
+    background: #111a2b;
+    border: 1px solid #26344a;
+    border-radius: 12px;
+    padding: 23px;
+    margin-bottom: 25px;
+}
+
+.learning-card h3 {
+    font-size: 18px;
+    margin-bottom: 10px;
+}
+
+.learning-card p {
+    color: #aab6ca;
+    font-size: 13px;
+    line-height: 1.7;
+    margin-bottom: 18px;
+}
+
+.primary-button {
+    display: inline-block;
+    background: #3b9cff;
+    color: #06101d;
+    padding: 12px 19px;
+    border-radius: 7px;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: bold;
+}
+
+.primary-button:hover {
+    background: #65b1ff;
+}
+
+.features {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 17px;
+    margin-bottom: 30px;
+}
+
+.feature-card {
+    background: #111a2b;
+    border: 1px solid #26344a;
+    padding: 22px;
+    border-radius: 11px;
+}
+
+.feature-card .icon {
+    font-size: 25px;
+    margin-bottom: 14px;
+}
+
+.feature-card h3 {
+    font-size: 16px;
+    margin-bottom: 9px;
+}
+
+.feature-card p {
+    color: #aab6ca;
+    font-size: 13px;
+    line-height: 1.7;
+}
+
+.feature-card .status {
+    display: inline-block;
+    margin-top: 14px;
+    color: #3b9cff;
+    font-size: 11px;
+    font-weight: bold;
+}
+
+footer {
+    border-top: 1px solid #26344a;
+    text-align: center;
+    padding: 25px 15px;
+    color: #78869d;
+    font-size: 12px;
+}
+
+#loading {
+    text-align: center;
+    padding: 100px 20px;
+    color: #aab6ca;
+}
+
+#error {
+    display: none;
+    text-align: center;
+    padding: 40px 20px;
+    color: #ff7777;
+}
+
+@media(max-width: 650px) {
+
+    header {
+        padding: 16px;
+    }
+
+    .logo {
+        font-size: 17px;
+    }
+
+    main {
+        padding: 27px 16px;
+    }
+
+    .welcome h1 {
+        font-size: 23px;
+    }
+
+    .stats {
+        grid-template-columns: 1fr;
+    }
+
+    .features {
+        grid-template-columns: 1fr;
+    }
+
+    .profile-card {
+        padding: 17px;
+    }
+
+}
+
+</style>
+</head>
+
+<body>
+
+<div id="loading">
+    Loading your student dashboard...
+</div>
+
+<div id="error">
+    <h3>Unable to load your dashboard.</h3>
+    <p id="errorMessage"></p>
+</div>
+
+<div id="dashboard" style="display:none;">
+
+<header>
+
+    <div class="logo">
+        GlobalMedia <span>AI</span>
+    </div>
+
+    <button class="logout" id="logoutButton">
+        Log Out
+    </button>
+
+</header>
+
+
+<main>
+
+    <!-- WELCOME -->
+
+    <section class="welcome">
+
+        <h1>
+            Welcome back, <span id="firstName">Student</span>!
+        </h1>
+
+        <p>
+            Your journey towards becoming a skilled web developer
+            continues here. Learn, practise, build and grow.
+        </p>
+
+    </section>
+
+
+    <!-- STUDENT PROFILE -->
+
+    <section class="profile-card">
+
+        <div class="avatar" id="avatar">
+            S
+        </div>
+
+        <div class="profile-info">
+
+            <h3 id="fullName">Student Name</h3>
+
+            <p id="username">@username</p>
+
+            <p id="email">student@email.com</p>
+
+        </div>
+
+    </section>
+
+
+    <!-- LEARNING OVERVIEW -->
+
+    <h2 class="section-title">
+        Learning Overview
+    </h2>
+
+    <section class="stats">
+
+        <div class="stat-card">
+
+            <h3 id="courseCount">0</h3>
+
+            <p>Enrolled Courses</p>
+
+        </div>
+
+        <div class="stat-card">
+
+            <h3 id="lessonCount">0</h3>
+
+            <p>Completed Lessons</p>
+
+        </div>
+
+        <div class="stat-card">
+
+            <h3 id="progressCount">0%</h3>
+
+            <p>Learning Progress</p>
+
+        </div>
+
+    </section>
+
+
+    <!-- CONTINUE LEARNING -->
+
+    <h2 class="section-title">
+        Your Learning Space
+    </h2>
+
+    <section class="learning-card">
+
+        <h3>Start Your Learning Journey</h3>
+
+        <p>
+            Welcome to GlobalMedia AI Developer Coach.
+
+            Your learning environment is being prepared.
+            Get ready to explore web development, understand
+            coding concepts and develop practical skills.
+        </p>
+
+        <a href="courses.html" class="primary-button">
+            Explore Courses
+        </a>
+
+    </section>
+
+
+    <!-- FEATURES -->
+
+    <h2 class="section-title">
+        Learning Resources
+    </h2>
+
+    <section class="features">
+
+        <div class="feature-card">
+
+            <div class="icon">📚</div>
+
+            <h3>My Courses</h3>
+
+            <p>
+                Access your enrolled courses and structured
+                learning materials.
+            </p>
+
+            <span class="status">LEARNING SECTION</span>
+
+        </div>
+
+
+        <div class="feature-card">
+
+            <div class="icon">🤖</div>
+
+            <h3>AI Developer Coach</h3>
+
+            <p>
+                Get intelligent assistance with coding concepts,
+                questions and technical challenges.
+            </p>
+
+            <span class="status">AI INTEGRATION</span>
+
+        </div>
+
+
+        <div class="feature-card">
+
+            <div class="icon">📝</div>
+
+            <h3>Assignments</h3>
+
+            <p>
+                Access practical exercises and submit your
+                learning assignments.
+            </p>
+
+            <span class="status">ASSESSMENT SECTION</span>
+
+        </div>
+
+
+        <div class="feature-card">
+
+            <div class="icon">🏆</div>
+
+            <h3>My Certificates</h3>
+
+            <p>
+                Access certificates earned after completing
+                eligible learning programmes.
+            </p>
+
+            <span class="status">CERTIFICATION SECTION</span>
+
+        </div>
+
+
+        <div class="feature-card">
+
+            <div class="icon">📊</div>
+
+            <h3>My Progress</h3>
+
+            <p>
+                Monitor your learning progress and completed
+                lessons.
+            </p>
+
+            <span class="status">PROGRESS TRACKING</span>
+
+        </div>
+
+
+        <div class="feature-card">
+
+            <div class="icon">⚙️</div>
+
+            <h3>Account Settings</h3>
+
+            <p>
+                Manage your student account and personal
+                information.
+            </p>
+
+            <span class="status">ACCOUNT MANAGEMENT</span>
+
+        </div>
+
+    </section>
+
+</main>
+
+
+<footer>
+
+    © 2026 GlobalMedia AI Developer Coach.
+    All rights reserved.
+
+</footer>
+
+</div>
+
+
+<script>
+
+// ===================================
+// GLOBALMEDIA AI DEVELOPER COACH
+// STUDENT DASHBOARD
+// ===================================
+
+
+async function loadDashboard() {
+
+    const loading = document.getElementById("loading");
+    const dashboard = document.getElementById("dashboard");
+    const errorBox = document.getElementById("error");
+
+    try {
+
+        // Check authentication
+
+        const { data: sessionData, error: sessionError } =
+            await supabaseClient.auth.getSession();
+
+        if (sessionError) throw sessionError;
+
+        const session = sessionData.session;
+
+        if (!session) {
+
+            window.location.replace("login.html");
+            return;
+
+        }
+
+
+        // Retrieve student profile
+
+        const { data: profile, error: profileError } =
+            await supabaseClient
+                .from("profiles")
+                .select("*")
+                .eq("id", session.user.id)
+                .single();
+
+        if (profileError) throw profileError;
+
+
+        // Student information
+
+        const firstName =
+            profile.first_name ||
+            session.user.user_metadata?.first_name ||
+            "Student";
+
+        const lastName =
+            profile.last_name ||
+            session.user.user_metadata?.last_name ||
+            "";
+
+        const username =
+            profile.username ||
+            session.user.user_metadata?.username ||
+            "student";
+
+        const email =
+            profile.email ||
+            session.user.email ||
+            "";
+
+
+        // Display information
+
+        document.getElementById("firstName").textContent =
+            firstName;
+
+        document.getElementById("fullName").textContent =
+            firstName + " " + lastName;
+
+        document.getElementById("username").textContent =
+            "@" + username;
+
+        document.getElementById("email").textContent =
+            email;
+
+
+        // Profile picture
+
+        const avatar = document.getElementById("avatar");
+
+        if (profile.profile_photo) {
+
+            const img = document.createElement("img");
+
+            img.src = profile.profile_photo;
+            img.alt = "Student profile photo";
+
+            img.onerror = function() {
+                avatar.textContent = firstName.charAt(0).toUpperCase();
+            };
+
+            avatar.textContent = "";
+            avatar.appendChild(img);
+
+        } else {
+
+            avatar.textContent =
+                firstName.charAt(0).toUpperCase();
+
+        }
+
+
+        // Show dashboard
+
+        loading.style.display = "none";
+        dashboard.style.display = "block";
+
+
+    } catch (error) {
+
+        console.error("Dashboard error:", error);
+
+        loading.style.display = "none";
+
+        errorBox.style.display = "block";
+
+        document.getElementById("errorMessage").textContent =
+            error.message || "Please try again.";
+
+    }
+
+}
+
+
+// ===================================
+// LOGOUT
+// ===================================
+
+document.getElementById("logoutButton")
+.addEventListener("click", async function() {
+
+    const button = this;
+
+    button.disabled = true;
+    button.textContent = "Logging out...";
+
+    try {
+
+        const { error } = await supabaseClient.auth.signOut();
+
+        if (error) throw error;
+
+        window.location.replace("login.html");
+
+    } catch (error) {
+
+        alert("Unable to log out: " + error.message);
+
+        button.disabled = false;
+        button.textContent = "Log Out";
+
+    }
+
+});
+
+
+// Load dashboard
+
+loadDashboard();
+
+</script>
+
+</body>
+  </html>
