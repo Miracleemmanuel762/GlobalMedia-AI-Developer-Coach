@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Courses | GlobalMedia AI Developer Coach</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js"></script>
+
+<style>
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background: #080d18;
+    color: white;
+    font-family: Arial, sans-serif;
+}
+
+header {
+    background: #111a2b;
+    padding: 18px 6%;
+    border-bottom: 1px solid #26344a;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo {
+    font-size: 21px;
+    font-weight: bold;
+}
+
+.logo span {
+    color: #3b9cff;
+}
+
+.back {
+    text-decoration: none;
+    color: #3b9cff;
+    font-size: 13px;
+}
+
+main {
+    max-width: 1150px;
+    margin: auto;
+    padding: 35px 20px;
+}
+
+.heading {
+    margin-bottom: 30px;
+}
+
+.heading h1 {
+    font-size: 27px;
+    margin-bottom: 10px;
+}
+
+.heading p {
+    color: #aab6ca;
+    font-size: 14px;
+    line-height: 1.7;
+}
+
+.course-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 22px;
+}
+
+.course-card {
+    background: #111a2b;
+    border: 1px solid #26344a;
+    border-radius: 12px;
+    overflow: hidden;
+    transition: 0.25s;
+}
+
+.course-card:hover {
+    transform: translateY(-4px);
+    border-color: #3b9cff;
+}
+
+.course-image {
+    width: 100%;
+    height: 175px;
+    background: #17253b;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #3b9cff;
+    font-size: 35px;
+    overflow: hidden;
+}
+
+.course-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.course-content {
+    padding: 20px;
+}
+
+.level {
+    display: inline-block;
+    background: #183454;
+    color: #65b1ff;
+    padding: 6px 10px;
+    border-radius: 5px;
+    font-size: 11px;
+    margin-bottom: 13px;
+}
+
+.course-content h2 {
+    font-size: 18px;
+    margin-bottom: 10px;
+}
+
+.course-content p {
+    color: #aab6ca;
+    font-size: 13px;
+    line-height: 1.7;
+    margin-bottom: 20px;
+}
+
+.course-button {
+    display: block;
+    background: #3b9cff;
+    color: #06101d;
+    text-decoration: none;
+    text-align: center;
+    padding: 12px;
+    border-radius: 7px;
+    font-size: 13px;
+    font-weight: bold;
+}
+
+.course-button:hover {
+    background: #65b1ff;
+}
+
+.state {
+    text-align: center;
+    padding: 70px 20px;
+    color: #aab6ca;
+    line-height: 1.8;
+}
+
+.state h2 {
+    color: white;
+    margin-bottom: 12px;
+}
+
+footer {
+    border-top: 1px solid #26344a;
+    text-align: center;
+    padding: 25px;
+    color: #78869d;
+    font-size: 12px;
+    margin-top: 50px;
+}
+
+@media(max-width: 850px) {
+
+    .course-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+}
+
+@media(max-width: 550px) {
+
+    header {
+        padding: 17px;
+    }
+
+    .logo {
+        font-size: 17px;
+    }
+
+    main {
+        padding: 27px 16px;
+    }
+
+    .heading h1 {
+        font-size: 23px;
+    }
+
+    .course-grid {
+        grid-template-columns: 1fr;
+    }
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<header>
+
+    <div class="logo">
+        GlobalMedia <span>AI</span>
+    </div>
+
+    <a href="dashboard.html" class="back">
+        ← Dashboard
+    </a>
+
+</header>
+
+
+<main>
+
+    <section class="heading">
+
+        <h1>Explore Courses</h1>
+
+        <p>
+            Discover structured learning programmes designed
+            to help you develop practical technological skills.
+        </p>
+
+    </section>
+
+
+    <div id="loading" class="state">
+
+        Loading available courses...
+
+    </div>
+
+
+    <div id="courseGrid" class="course-grid"></div>
+
+
+    <div id="emptyState" class="state" style="display:none;">
+
+        <h2>No courses available yet.</h2>
+
+        <p>
+            New learning programmes will appear here
+            once they are published.
+        </p>
+
+    </div>
+
+
+    <div id="errorState" class="state" style="display:none;">
+
+        <h2>Unable to load courses.</h2>
+
+        <p id="errorMessage"></p>
+
+    </div>
+
+</main>
+
+
+<footer>
+
+    © 2026 GlobalMedia AI Developer Coach.
+    All rights reserved.
+
+</footer>
+
+
+<script>
+
+// =================================
+// GLOBALMEDIA AI
+// COURSE MANAGEMENT
+// =================================
+
+
+async function loadCourses() {
+
+    const loading = document.getElementById("loading");
+
+    const grid = document.getElementById("courseGrid");
+
+    const empty = document.getElementById("emptyState");
+
+    const errorBox = document.getElementById("errorState");
+
+
+    try {
+
+        // Check student authentication
+
+        const { data: sessionData, error: sessionError } =
+            await supabaseClient.auth.getSession();
+
+        if (sessionError) throw sessionError;
+
+        if (!sessionData.session) {
+
+            window.location.replace("login.html");
+
+            return;
+
+        }
+
+
+        // Retrieve published courses
+
+        const { data: courses, error } =
+            await supabaseClient
+                .from("courses")
+                .select("id, title, description, thumbnail_url, level")
+                .eq("is_published", true)
+                .order("created_at", { ascending: false });
+
+
+        if (error) throw error;
+
+
+        loading.style.display = "none";
+
+
+        if (!courses || courses.length === 0) {
+
+            empty.style.display = "block";
+
+            return;
+
+        }
+
+
+        // Display courses
+
+        courses.forEach(course => {
+
+            const card = document.createElement("article");
+
+            card.className = "course-card";
+
+
+            const image = document.createElement("div");
+
+            image.className = "course-image";
+
+
+            if (course.thumbnail_url) {
+
+                const img = document.createElement("img");
+
+                img.src = course.thumbnail_url;
+
+                img.alt = course.title;
+
+                img.onerror = function() {
+
+                    image.textContent = "📚";
+
+                };
+
+                image.appendChild(img);
+
+            } else {
+
+                image.textContent = "📚";
+
+            }
+
+
+            const content = document.createElement("div");
+
+            content.className = "course-content";
+
+
+            const level = document.createElement("span");
+
+            level.className = "level";
+
+            level.textContent = course.level || "Beginner";
+
+
+            const title = document.createElement("h2");
+
+            title.textContent = course.title;
+
+
+            const description = document.createElement("p");
+
+            description.textContent = course.description;
+
+
+            const button = document.createElement("a");
+
+            button.className = "course-button";
+
+            button.textContent = "View Course";
+
+            button.href =
+                "course-details.html?id=" +
+                encodeURIComponent(course.id);
+
+
+            content.appendChild(level);
+
+            content.appendChild(title);
+
+            content.appendChild(description);
+
+            content.appendChild(button);
+
+
+            card.appendChild(image);
+
+            card.appendChild(content);
+
+
+            grid.appendChild(card);
+
+        });
+
+
+    } catch (error) {
+
+        console.error(error);
+
+        loading.style.display = "none";
+
+        errorBox.style.display = "block";
+
+        document.getElementById("errorMessage").textContent =
+            error.message || "Please try again.";
+
+    }
+
+}
+
+
+// Start
+
+loadCourses();
+
+</script>
+
+</body>
+</html>
