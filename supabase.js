@@ -1,5 +1,5 @@
 // GLOBALMEDIA AI DEVELOPER COACH
-// Supabase Database Connection
+// SUPABASE CONFIGURATION
 
 const SUPABASE_URL = "https://eukiweujhrccteopzglm.supabase.co";
 
@@ -9,5 +9,3 @@ const supabaseClient = window.supabase.createClient(
     SUPABASE_URL,
     SUPABASE_KEY
 );
-
-console.log("GlobalMedia Academy connected to Supabase!");
