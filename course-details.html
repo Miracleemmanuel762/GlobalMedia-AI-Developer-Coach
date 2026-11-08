@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Course Details | GlobalMedia AI Developer Coach</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js"></script>
+
+<style>
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background: #080d18;
+    color: white;
+    font-family: Arial, sans-serif;
+}
+
+header {
+    background: #111a2b;
+    padding: 18px 6%;
+    border-bottom: 1px solid #26344a;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo {
+    font-size: 21px;
+    font-weight: bold;
+}
+
+.logo span {
+    color: #3b9cff;
+}
+
+.back {
+    color: #3b9cff;
+    text-decoration: none;
+    font-size: 13px;
+}
+
+main {
+    max-width: 1000px;
+    margin: auto;
+    padding: 35px 20px;
+}
+
+.state {
+    text-align: center;
+    padding: 70px 20px;
+    color: #aab6ca;
+    line-height: 1.7;
+}
+
+#error {
+    display: none;
+    color: #ff7777;
+}
+
+.course-header {
+    background: linear-gradient(135deg, #142744, #111a2b);
+    border: 1px solid #263e5d;
+    padding: 27px;
+    border-radius: 13px;
+    margin-bottom: 35px;
+}
+
+.course-header h1 {
+    font-size: 27px;
+    margin-bottom: 12px;
+}
+
+.course-header p {
+    color: #aab6ca;
+    font-size: 14px;
+    line-height: 1.8;
+}
+
+.course-level {
+    display: inline-block;
+    background: #183454;
+    color: #65b1ff;
+    padding: 7px 12px;
+    border-radius: 5px;
+    font-size: 11px;
+    margin-bottom: 15px;
+}
+
+.section-title {
+    font-size: 21px;
+    margin-bottom: 20px;
+}
+
+.stage-card {
+    background: #111a2b;
+    border: 1px solid #26344a;
+    border-radius: 11px;
+    margin-bottom: 20px;
+    overflow: hidden;
+}
+
+.stage-heading {
+    padding: 20px;
+    border-bottom: 1px solid #26344a;
+}
+
+.stage-heading h3 {
+    font-size: 17px;
+    margin-bottom: 7px;
+}
+
+.stage-heading p {
+    color: #aab6ca;
+    font-size: 12px;
+    line-height: 1.6;
+}
+
+.lesson-list {
+    padding: 10px 18px;
+}
+
+.lesson {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+    padding: 17px 5px;
+    border-bottom: 1px solid #26344a;
+}
+
+.lesson:last-child {
+    border-bottom: none;
+}
+
+.lesson-info {
+    flex: 1;
+}
+
+.lesson-info h4 {
+    font-size: 14px;
+    margin-bottom: 6px;
+}
+
+.lesson-info p {
+    font-size: 11px;
+    color: #8795aa;
+}
+
+.lesson-status {
+    font-size: 10px;
+    font-weight: bold;
+    padding: 7px 10px;
+    border-radius: 5px;
+    white-space: nowrap;
+}
+
+.status-locked {
+    background: #30232b;
+    color: #ff8585;
+}
+
+.status-unlocked {
+    background: #183454;
+    color: #65b1ff;
+}
+
+.status-completed {
+    background: #18352f;
+    color: #48d597;
+}
+
+.status-mastered {
+    background: #393219;
+    color: #f5d46b;
+}
+
+.lesson-button {
+    display: inline-block;
+    margin-top: 9px;
+    color: #3b9cff;
+    font-size: 12px;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.lesson-button:hover {
+    text-decoration: underline;
+}
+
+.locked-message {
+    color: #ff8585;
+    font-size: 11px;
+    margin-top: 9px;
+}
+
+.empty {
+    text-align: center;
+    padding: 35px 15px;
+    color: #aab6ca;
+    font-size: 13px;
+}
+
+footer {
+    border-top: 1px solid #26344a;
+    text-align: center;
+    padding: 25px;
+    color: #78869d;
+    font-size: 12px;
+    margin-top: 50px;
+}
+
+@media(max-width: 550px) {
+    header {
+        padding: 17px;
+    }
+
+    .logo {
+        font-size: 17px;
+    }
+
+    main {
+        padding: 25px 15px;
+    }
+
+    .course-header h1 {
+        font-size: 22px;
+    }
+
+    .lesson {
+        align-items: flex-start;
+    }
+
+    .lesson-status {
+        font-size: 9px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <div class="logo">
+        GlobalMedia <span>AI</span>
+    </div>
+
+    <a href="courses.html" class="back">
+        ← Courses
+    </a>
+</header>
+
+<main>
+
+    <div id="loading" class="state">
+        Loading course details...
+    </div>
+
+    <div id="error" class="state">
+        <h3>Unable to load this course.</h3>
+        <p id="errorMessage"></p>
+    </div>
+
+    <div id="content" style="display:none;">
+
+        <section class="course-header">
+
+            <span class="course-level" id="courseLevel">
+                Beginner
+            </span>
+
+            <h1 id="courseTitle"></h1>
+
+            <p id="courseDescription"></p>
+
+        </section>
+
+        <h2 class="section-title">
+            Course Curriculum
+        </h2>
+
+        <div id="stageContainer"></div>
+
+    </div>
+
+</main>
+
+<footer>
+    © 2026 GlobalMedia AI Developer Coach.
+    All rights reserved.
+</footer>
+
+<script>
+
+const params = new URLSearchParams(window.location.search);
+
+const courseId = params.get("id");
+
+const loading = document.getElementById("loading");
+const errorBox = document.getElementById("error");
+const content = document.getElementById("content");
+const stageContainer = document.getElementById("stageContainer");
+
+
+// Show errors
+
+function showError(message) {
+
+    loading.style.display = "none";
+    content.style.display = "none";
+    errorBox.style.display = "block";
+
+    document.getElementById("errorMessage").textContent = message;
+
+}
+
+
+// Load course
+
+async function loadCourse() {
+
+    try {
+
+        // Validate course ID
+
+        if (!courseId) {
+            throw new Error("No course was selected.");
+        }
+
+
+        // Check student authentication
+
+        const { data: sessionData, error: sessionError } =
+            await supabaseClient.auth.getSession();
+
+        if (sessionError) throw sessionError;
+
+        const session = sessionData.session;
+
+        if (!session) {
+            window.location.replace("login.html");
+            return;
+        }
+
+
+        // Retrieve course
+
+        const { data: course, error: courseError } =
+            await supabaseClient
+                .from("courses")
+                .select("*")
+                .eq("id", courseId)
+                .eq("is_published", true)
+                .single();
+
+        if (courseError) throw courseError;
+
+
+        // Display course information
+
+        document.title = course.title + " | GlobalMedia AI";
+
+        document.getElementById("courseTitle").textContent =
+            course.title;
+
+        document.getElementById("courseDescription").textContent =
+            course.description;
+
+        document.getElementById("courseLevel").textContent =
+            course.level || "Beginner";
+
+
+        // Retrieve course stages
+
+        const { data: stages, error: stageError } =
+            await supabaseClient
+                .from("stages")
+                .select("*")
+                .eq("course_id", courseId)
+                .order("stage_number", { ascending: true });
+
+        if (stageError) throw stageError;
+
+
+        if (!stages || stages.length === 0) {
+
+            stageContainer.innerHTML = `
+                <div class="empty">
+                    No learning stages have been added to this course yet.
+                </div>
+            `;
+
+            loading.style.display = "none";
+            content.style.display = "block";
+
+            return;
+        }
+
+
+        // Retrieve student progress
+
+        const { data: progress, error: progressError } =
+            await supabaseClient
+                .from("student_progress")
+                .select("lesson_id, status")
+                .eq("student_id", session.user.id);
+
+        if (progressError) throw progressError;
+
+
+        const progressMap = {};
+
+        (progress || []).forEach(item => {
+
+            progressMap[item.lesson_id] = item.status;
+
+        });
+
+
+        // Retrieve and display lessons
+
+        for (const stage of stages) {
+
+            const { data: lessons, error: lessonError } =
+                await supabaseClient
+                    .from("lessons")
+                    .select("*")
+                    .eq("stage_id", stage.id)
+                    .eq("is_published", true)
+                    .order("lesson_number", { ascending: true });
+
+            if (lessonError) throw lessonError;
+
+
+            const stageCard = document.createElement("section");
+
+            stageCard.className = "stage-card";
+
+
+            const heading = document.createElement("div");
+
+            heading.className = "stage-heading";
+
+            const stageTitle = document.createElement("h3");
+
+            stageTitle.textContent =
+                "Stage " + stage.stage_number + ": " + stage.title;
+
+            const stageDescription = document.createElement("p");
+
+            stageDescription.textContent =
+                stage.description || "Explore this learning stage.";
+
+            heading.appendChild(stageTitle);
+            heading.appendChild(stageDescription);
+
+
+            const lessonList = document.createElement("div");
+
+            lessonList.className = "lesson-list";
+
+
+            if (!lessons || lessons.length === 0) {
+
+                lessonList.innerHTML = `
+                    <div class="empty">
+                        Lessons for this stage are coming soon.
+                    </div>
+                `;
+
+            } else {
+
+                lessons.forEach(lesson => {
+
+                    const status =
+                        progressMap[lesson.id] || "locked";
+
+
+                    const lessonItem = document.createElement("div");
+
+                    lessonItem.className = "lesson";
+
+
+                    const info = document.createElement("div");
+
+                    info.className = "lesson-info";
+
+
+                    const title = document.createElement("h4");
+
+                    title.textContent =
+                        "Lesson " + lesson.lesson_number +
+                        ": " + lesson.title;
+
+
+                    const description = document.createElement("p");
+
+                    description.textContent =
+                        lesson.learning_objectives ||
+                        "Explore this lesson and develop your skills.";
+
+
+                    info.appendChild(title);
+                    info.appendChild(description);
+
+
+                    const statusBadge = document.createElement("span");
+
+                    statusBadge.className = "lesson-status";
+
+
+                    if (status === "mastered") {
+
+                        statusBadge.classList.add("status-mastered");
+
+                        statusBadge.textContent = "MASTERED";
+
+                    } else if (status === "completed") {
+
+                        statusBadge.classList.add("status-completed");
+
+                        statusBadge.textContent = "COMPLETED";
+
+                    } else if (status === "unlocked") {
+
+                        statusBadge.classList.add("status-unlocked");
+
+                        statusBadge.textContent = "UNLOCKED";
+
+                    } else {
+
+                        statusBadge.classList.add("status-locked");
+
+                        statusBadge.textContent = "LOCKED";
+
+                    }
+
+
+                    // Open only lessons marked as accessible
+
+                    if (
+                        status === "unlocked" ||
+                        status === "completed" ||
+                        status === "mastered"
+                    ) {
+
+                        const button = document.createElement("a");
+
+                        button.className = "lesson-button";
+
+                        button.textContent = "Open Lesson →";
+
+                        button.href =
+                            "lesson.html?id=" +
+                            encodeURIComponent(lesson.id);
+
+                        info.appendChild(button);
+
+                    } else {
+
+                        const locked = document.createElement("div");
+
+                        locked.className = "locked-message";
+
+                        locked.textContent =
+                            "Complete the required learning steps to unlock this lesson.";
+
+                        info.appendChild(locked);
+
+                    }
+
+
+                    lessonItem.appendChild(info);
+
+                    lessonItem.appendChild(statusBadge);
+
+                    lessonList.appendChild(lessonItem);
+
+                });
+
+            }
+
+
+            stageCard.appendChild(heading);
+
+            stageCard.appendChild(lessonList);
+
+            stageContainer.appendChild(stageCard);
+
+        }
+
+
+        loading.style.display = "none";
+
+        content.style.display = "block";
+
+
+    } catch (error) {
+
+        console.error("Course loading error:", error);
+
+        showError(error.message || "Please try again.");
+
+    }
+
+}
+
+
+// Start
+
+loadCourse();
+
+</script>
+
+</body>
+</html>
