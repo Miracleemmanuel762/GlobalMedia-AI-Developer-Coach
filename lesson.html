@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Learning Environment | GlobalMedia AI</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js"></script>
+
+<style>
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background: #080d18;
+    color: white;
+    font-family: Arial, sans-serif;
+    line-height: 1.7;
+}
+
+header {
+    background: #111a2b;
+    border-bottom: 1px solid #26344a;
+    padding: 17px 6%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo {
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.logo span {
+    color: #3b9cff;
+}
+
+.back {
+    color: #3b9cff;
+    text-decoration: none;
+    font-size: 13px;
+}
+
+main {
+    max-width: 900px;
+    margin: auto;
+    padding: 35px 20px;
+}
+
+.loading,
+.error {
+    text-align: center;
+    padding: 70px 20px;
+    color: #aab6ca;
+}
+
+.error {
+    display: none;
+    color: #ff7777;
+}
+
+#lessonContent {
+    display: none;
+}
+
+.lesson-heading {
+    margin-bottom: 30px;
+}
+
+.lesson-heading h1 {
+    font-size: 27px;
+    margin-bottom: 10px;
+}
+
+.lesson-heading p {
+    color: #aab6ca;
+    font-size: 13px;
+}
+
+.badge {
+    display: inline-block;
+    background: #183454;
+    color: #65b1ff;
+    padding: 6px 11px;
+    border-radius: 5px;
+    font-size: 11px;
+    margin-bottom: 12px;
+}
+
+.lesson-section {
+    background: #111a2b;
+    border: 1px solid #26344a;
+    border-radius: 11px;
+    padding: 23px;
+    margin-bottom: 20px;
+}
+
+.lesson-section h2 {
+    font-size: 19px;
+    margin-bottom: 15px;
+    color: #65b1ff;
+}
+
+.lesson-section p {
+    color: #d0d8e6;
+    font-size: 14px;
+    margin-bottom: 12px;
+    white-space: pre-wrap;
+}
+
+.lesson-section ul {
+    padding-left: 22px;
+    color: #d0d8e6;
+    font-size: 14px;
+}
+
+.lesson-section li {
+    margin-bottom: 9px;
+}
+
+pre {
+    background: #080d18;
+    border: 1px solid #26344a;
+    border-radius: 8px;
+    padding: 17px;
+    overflow-x: auto;
+    margin: 15px 0;
+    color: #8dc5ff;
+    font-size: 13px;
+    line-height: 1.7;
+}
+
+.exercise {
+    background: #142744;
+    border-left: 3px solid #3b9cff;
+    padding: 17px;
+    border-radius: 5px;
+    margin-bottom: 12px;
+    font-size: 14px;
+    color: #d0d8e6;
+}
+
+footer {
+    text-align: center;
+    padding: 25px;
+    border-top: 1px solid #26344a;
+    color: #78869d;
+    font-size: 12px;
+}
+
+@media(max-width: 550px) {
+    header {
+        padding: 16px;
+    }
+
+    .logo {
+        font-size: 17px;
+    }
+
+    main {
+        padding: 25px 15px;
+    }
+
+    .lesson-heading h1 {
+        font-size: 23px;
+    }
+
+    .lesson-section {
+        padding: 18px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <div class="logo">
+        GlobalMedia <span>AI</span>
+    </div>
+
+    <a href="courses.html" class="back">
+        ← Courses
+    </a>
+</header>
+
+<main>
+
+    <div id="loading" class="loading">
+        Preparing your learning environment...
+    </div>
+
+    <div id="error" class="error">
+        <h2>Unable to open lesson</h2>
+        <p id="errorMessage"></p>
+    </div>
+
+    <div id="lessonContent">
+
+        <section class="lesson-heading">
+
+            <span class="badge">OFFICIAL LESSON</span>
+
+            <h1 id="lessonTitle"></h1>
+
+            <p id="lessonNumber"></p>
+
+        </section>
+
+        <section class="lesson-section">
+            <h2>Introduction</h2>
+            <div id="introduction"></div>
+        </section>
+
+        <section class="lesson-section">
+            <h2>Learning Objectives</h2>
+            <ul id="objectives"></ul>
+        </section>
+
+        <section class="lesson-section">
+            <h2>Lesson Explanation</h2>
+            <div id="explanation"></div>
+        </section>
+
+        <section class="lesson-section">
+            <h2>Code Examples</h2>
+            <div id="codeExamples"></div>
+        </section>
+
+        <section class="lesson-section">
+            <h2>Demonstration</h2>
+            <div id="demonstration"></div>
+        </section>
+
+        <section class="lesson-section">
+            <h2>Guided Exercises</h2>
+            <div id="guidedExercises"></div>
+        </section>
+
+        <section class="lesson-section">
+            <h2>Independent Assignment</h2>
+            <div id="assignment"></div>
+        </section>
+
+    </div>
+
+</main>
+
+<footer>
+    © 2026 GlobalMedia AI Developer Coach.
+    All rights reserved.
+</footer>
+
+<script>
+
+const lessonId = new URLSearchParams(
+    window.location.search
+).get("id");
+
+const loading = document.getElementById("loading");
+const errorBox = document.getElementById("error");
+const lessonContainer = document.getElementById("lessonContent");
+
+function showError(message) {
+
+    loading.style.display = "none";
+    lessonContainer.style.display = "none";
+    errorBox.style.display = "block";
+
+    document.getElementById("errorMessage").textContent = message;
+
+}
+
+
+// Display text safely
+
+function displayText(elementId, value) {
+
+    const element = document.getElementById(elementId);
+
+    element.replaceChildren();
+
+    if (!value) {
+        element.textContent = "Content will be provided soon.";
+        return;
+    }
+
+    if (typeof value === "string") {
+        element.textContent = value;
+        return;
+    }
+
+    if (Array.isArray(value)) {
+
+        value.forEach(item => {
+
+            const p = document.createElement("p");
+
+            p.textContent =
+                typeof item === "string"
+                ? item
+                : JSON.stringify(item);
+
+            element.appendChild(p);
+
+        });
+
+        return;
+    }
+
+    element.textContent = JSON.stringify(value);
+
+}
+
+
+// Display objectives
+
+function displayList(elementId, items) {
+
+    const list = document.getElementById(elementId);
+
+    list.replaceChildren();
+
+    if (!Array.isArray(items) || items.length === 0) {
+
+        const li = document.createElement("li");
+
+        li.textContent = "Objectives will be provided soon.";
+
+        list.appendChild(li);
+
+        return;
+    }
+
+    items.forEach(item => {
+
+        const li = document.createElement("li");
+
+        li.textContent = item;
+
+        list.appendChild(li);
+
+    });
+
+}
+
+
+// Display code examples
+
+function displayCodeExamples(examples) {
+
+    const container = document.getElementById("codeExamples");
+
+    container.replaceChildren();
+
+    if (!Array.isArray(examples) || examples.length === 0) {
+
+        container.textContent = "Code examples will be provided soon.";
+
+        return;
+    }
+
+    examples.forEach(example => {
+
+        const wrapper = document.createElement("div");
+
+        if (example.title) {
+
+            const heading = document.createElement("h3");
+
+            heading.textContent = example.title;
+
+            wrapper.appendChild(heading);
+
+        }
+
+        const description = document.createElement("p");
+
+        if (example.description) {
+
+            description.textContent = example.description;
+
+            wrapper.appendChild(description);
+
+        }
+
+        const pre = document.createElement("pre");
+
+        pre.textContent =
+            example.code || "";
+
+        wrapper.appendChild(pre);
+
+        if (example.explanation) {
+
+            const explanation = document.createElement("p");
+
+            explanation.textContent = example.explanation;
+
+            wrapper.appendChild(explanation);
+
+        }
+
+        container.appendChild(wrapper);
+
+    });
+
+}
+
+
+// Main lesson loader
+
+async function loadLesson() {
+
+    try {
+
+        if (!lessonId) {
+            throw new Error("No lesson was selected.");
+        }
+
+
+        // Authenticate student
+
+        const { data: sessionData, error: sessionError } =
+            await supabaseClient.auth.getSession();
+
+        if (sessionError) throw sessionError;
+
+        const session = sessionData.session;
+
+        if (!session) {
+
+            window.location.replace("login.html");
+
+            return;
+
+        }
+
+
+        // Check lesson access
+
+        const { data: progress, error: progressError } =
+            await supabaseClient
+                .from("student_progress")
+                .select("status")
+                .eq("student_id", session.user.id)
+                .eq("lesson_id", lessonId)
+                .maybeSingle();
+
+        if (progressError) throw progressError;
+
+        if (
+            !progress ||
+            !["unlocked", "completed", "mastered"].includes(progress.status)
+        ) {
+
+            throw new Error(
+                "This lesson is locked. Complete the required learning steps to access it."
+            );
+
+        }
+
+
+        // Retrieve safe lesson information
+
+        const { data: lesson, error: lessonError } =
+            await supabaseClient
+                .from("lessons")
+                .select("id, title, lesson_number, is_published")
+                .eq("id", lessonId)
+                .eq("is_published", true)
+                .single();
+
+        if (lessonError) throw lessonError;
+
+
+        // Retrieve protected teaching materials
+        // Supabase RLS must authorize this request.
+
+        const { data: materials, error: materialsError } =
+            await supabaseClient
+                .from("lesson_contents")
+                .select(`
+                    introduction,
+                    objectives,
+                    explanation,
+                    code_examples,
+                    demonstration,
+                    guided_exercises,
+                    independent_assignment
+                `)
+                .eq("lesson_id", lessonId)
+                .single();
+
+        if (materialsError) throw materialsError;
+
+
+        // Display lesson
+
+        document.title = lesson.title + " | GlobalMedia AI";
+
+        document.getElementById("lessonTitle").textContent =
+            lesson.title;
+
+        document.getElementById("lessonNumber").textContent =
+            "Lesson " + lesson.lesson_number;
+
+
+        displayText("introduction", materials.introduction);
+
+        displayList("objectives", materials.objectives);
+
+        displayText("explanation", materials.explanation);
+
+        displayCodeExamples(materials.code_examples);
+
+        displayText("demonstration", materials.demonstration);
+
+        displayText("guidedExercises", materials.guided_exercises);
+
+        displayText("assignment", materials.independent_assignment);
+
+
+        loading.style.display = "none";
+
+        lessonContainer.style.display = "block";
+
+
+    } catch (error) {
+
+        console.error("Lesson error:", error);
+
+        showError(error.message || "Unable to load lesson.");
+
+    }
+
+}
+
+loadLesson();
+
+</script>
+
+</body>
+  </html>
